@@ -27,7 +27,7 @@ public class SqlServerService {
         log.info("Current Transaction Manager: {}", TransactionAspectSupport.currentTransactionStatus());
         log.info("Current Transaction Name: {}", TransactionSynchronizationManager.getCurrentTransactionName());
         log.info("Actual DataSource: {}", TransactionSynchronizationManager.getResource(dataSource));
-
+        log.info("#### current transaction read only: {}", TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 
         String sql = sqlReader.readSqlFile("sqlserver-test-01.sql");
         List<String> strings = jdbcTemplate.queryForList(sql, String.class);

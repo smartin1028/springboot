@@ -13,6 +13,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.sql.DataSource;
 import java.util.Properties;
@@ -30,8 +31,11 @@ public class DatabaseConfig {
     @Bean
 //    @ConfigurationProperties(prefix = "spring.datasource.primary")
     public DataSource dataSource() {
-        HikariConfig config = new HikariConfig();
 
+
+        HikariConfig config = new HikariConfig();
+//        config.setReadOnly(true);
+        config.setMaximumPoolSize(1);
 
         env.getProperty("spring.datasource.jdbc-url");
         String firstName = "spring.datasource."+choice;
