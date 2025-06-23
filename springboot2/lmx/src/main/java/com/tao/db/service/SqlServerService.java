@@ -16,21 +16,21 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-@Transactional(transactionManager = "primaryTransactionManager", readOnly = true)
+@Transactional(readOnly = true)
 public class SqlServerService {
-    private final JdbcTemplate primaryJdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
     private final SqlReader sqlReader;
-    private final DataSource primaryDataSource;
+    private final DataSource dataSource;
 
     public void selectTest(){
 
         log.info("Current Transaction Manager: {}", TransactionAspectSupport.currentTransactionStatus());
         log.info("Current Transaction Name: {}", TransactionSynchronizationManager.getCurrentTransactionName());
-        log.info("Actual DataSource: {}", TransactionSynchronizationManager.getResource(primaryDataSource));
+        log.info("Actual DataSource: {}", TransactionSynchronizationManager.getResource(dataSource));
 
 
         String sql = sqlReader.readSqlFile("sqlserver-test-01.sql");
-        List<String> strings = primaryJdbcTemplate.queryForList(sql, String.class);
+        List<String> strings = jdbcTemplate.queryForList(sql, String.class);
         for (String str : strings) {
             log.info("sql server int : {}", str);
         }

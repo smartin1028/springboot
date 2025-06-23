@@ -5,6 +5,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -22,22 +23,25 @@ import java.util.Properties;
 public class DatabaseConfig {
 
     private final Environment env;  // Spring이 자동으로 주입
-//    private final OracleDBConfig oracleDBConfig;
-//    private final SqlServerDBConfig serverDBConfig;
 
-    // 첫 번째 데이터소스 설정
-    @Primary
-    @Bean(name = "primaryDataSource")
+    @Value("${spring.datasource.choice:primary}")
+    private String choice;
+
+    @Bean
 //    @ConfigurationProperties(prefix = "spring.datasource.primary")
-    public DataSource primaryDataSource() {
+    public DataSource dataSource() {
         HikariConfig config = new HikariConfig();
-        // 필수 속성 설정
-        config.setJdbcUrl(env.getProperty("spring.datasource.primary.jdbc-url"));
-        config.setUsername(env.getProperty("spring.datasource.primary.username"));
-        config.setPassword(env.getProperty("spring.datasource.primary.password"));
-        config.setDriverClassName(env.getProperty("spring.datasource.primary.driver-class-name"));
 
-        extracted(config, "Primary");
+
+        env.getProperty("spring.datasource.jdbc-url");
+        String firstName = "spring.datasource."+choice;
+        // 필수 속성 설정
+        config.setJdbcUrl(env.getProperty(firstName + ".jdbc-url"));
+        config.setUsername(env.getProperty(firstName + ".username"));
+        config.setPassword(env.getProperty(firstName + ".password"));
+        config.setDriverClassName(env.getProperty(firstName + ".driver-class-name"));
+
+        extracted(config, choice);
 
         DataSource dataSource = new HikariDataSource(config);
         log.info("######## sql server datasource: {}", dataSource);
@@ -51,47 +55,15 @@ public class DatabaseConfig {
         log.info("##### " + str + " DataSource jdbcUrl: {}", jdbcUrl);
     }
 
-    // 두 번째 데이터소스 설정
-    @Bean(name = "secondaryDataSource")
-//    @ConfigurationProperties(prefix = "spring.datasource.secondary")
-    public DataSource secondaryDataSource() {
-        HikariConfig config = new HikariConfig();
-        // 필수 속성 설정
-        config.setJdbcUrl(env.getProperty("spring.datasource.secondary.jdbc-url"));
-        config.setUsername(env.getProperty("spring.datasource.secondary.username"));
-        config.setPassword(env.getProperty("spring.datasource.secondary.password"));
-        config.setDriverClassName(env.getProperty("spring.datasource.secondary.driver-class-name"));
-
-        extracted(config, "Secondary");
-
-        DataSource dataSource = new HikariDataSource(config);
-        log.info("######## sql oracle datasource: {}", dataSource);
-        return dataSource;
-    }
-
-    // 첫 번째 JdbcTemplate
-    @Primary
-    @Bean(name = "primaryJdbcTemplate")
-    public JdbcTemplate primaryJdbcTemplate(@Qualifier("primaryDataSource") DataSource dataSource) {
-        return new JdbcTemplate(dataSource);
-    }
-
-    // 두 번째 JdbcTemplate
-    @Bean(name = "secondaryJdbcTemplate")
-    public JdbcTemplate secondaryJdbcTemplate(@Qualifier("secondaryDataSource") DataSource dataSource) {
+    @Bean
+    public JdbcTemplate primaryJdbcTemplate(DataSource dataSource) {
         return new JdbcTemplate(dataSource);
     }
 
     // 첫 번째 TransactionManager
-    @Primary
-    @Bean(name = "primaryTransactionManager")
-    public PlatformTransactionManager primaryTransactionManager(@Qualifier("primaryDataSource") DataSource dataSource) {
+    @Bean
+    public PlatformTransactionManager primaryTransactionManager(DataSource dataSource) {
         return new DataSourceTransactionManager(dataSource);
     }
 
-    // 두 번째 TransactionManager
-    @Bean(name = "secondaryTransactionManager")
-    public PlatformTransactionManager secondaryTransactionManager(@Qualifier("secondaryDataSource") DataSource dataSource) {
-        return new DataSourceTransactionManager(dataSource);
-    }
 }

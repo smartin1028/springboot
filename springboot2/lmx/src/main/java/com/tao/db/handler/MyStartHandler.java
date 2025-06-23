@@ -1,21 +1,13 @@
 package com.tao.db.handler;
 
-import com.tao.db.repository.SqlReader;
-import com.tao.db.repository.SqlServerRepository;
+import com.tao.db.code.DataSourceType;
 import com.tao.db.service.OracleService;
 import com.tao.db.service.SqlServerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.CommandLineRunner;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.sql.DataSource;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 해당 클래스는 app이 실행되고 호출됩니다
@@ -26,18 +18,24 @@ import java.util.Map;
 public class MyStartHandler {
     // private final SqlServerRepository sqlServerRepository;
 
-    private final OracleService oracleService;
     private final SqlServerService sqlServerService;
+    private final OracleService oracleService;
 
+    @Value("${spring.datasource.choice:primary}")
+    private String choice;
 
     @Bean
-    public String runAndExit(@Qualifier("secondaryDataSource") DataSource dataSource02, @Qualifier("primaryDataSource") DataSource dataSource01
-    , @Qualifier("secondaryJdbcTemplate") JdbcTemplate secondaryJdbcTemplate) {
-        log.info("########## secondaryDataSource : {}", dataSource02);
-        log.info("########## secondaryDataSource : {}", dataSource02 == dataSource01);
+    public String runAndExit() {
 
-        sqlServerService.selectTest();
-        oracleService.selectTest(dataSource02, secondaryJdbcTemplate);
+        DataSourceType type = DataSourceType.valueOf(choice.toUpperCase());
+
+        if(type == DataSourceType.PRIMARY) {
+            sqlServerService.selectTest();
+        }else if(type == DataSourceType.SECONDARY) {
+            oracleService.selectTest();
+        }
+
+
         return "string";
 //
 //
