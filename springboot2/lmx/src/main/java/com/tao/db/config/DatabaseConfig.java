@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -31,8 +32,6 @@ public class DatabaseConfig {
     @Bean
 //    @ConfigurationProperties(prefix = "spring.datasource.primary")
     public DataSource dataSource() {
-
-
         HikariConfig config = new HikariConfig();
 //        config.setReadOnly(true);
         config.setMaximumPoolSize(1);

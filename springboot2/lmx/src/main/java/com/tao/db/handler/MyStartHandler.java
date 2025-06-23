@@ -1,12 +1,18 @@
 package com.tao.db.handler;
 
 import com.tao.db.code.DataSourceType;
+import com.tao.db.service.DBService;
 import com.tao.db.service.OracleService;
 import com.tao.db.service.SqlServerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 /**
@@ -15,40 +21,39 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class MyStartHandler {
+public class MyStartHandler  {
     // private final SqlServerRepository sqlServerRepository;
-
-    private final SqlServerService sqlServerService;
-    private final OracleService oracleService;
+    private final DBService sqlServerService;
+    private final DBService oracleService;
 
     @Value("${spring.datasource.choice:primary}")
     private String choice;
 
-    @Bean
-    public String runAndExit() {
+    @EventListener(ApplicationReadyEvent.class)
+    public void onApplicationEvent() {
+        log.info("###### @EventListener(ApplicationReadyEvent.class)");
 
+        // 모든 빈이 초기화된 후에 실행되므로 Proxy 적용 완료 상태
         DataSourceType type = DataSourceType.valueOf(choice.toUpperCase());
-
-        if(type == DataSourceType.PRIMARY) {
+        if (type == DataSourceType.PRIMARY) {
             sqlServerService.selectTest();
-        }else if(type == DataSourceType.SECONDARY) {
+        } else if (type == DataSourceType.SECONDARY) {
+            oracleService.selectTest();
+        }
+    }
+
+
+    //    @Bean
+    public String runAndExit() {
+        DataSourceType type = DataSourceType.valueOf(choice.toUpperCase());
+        if (type == DataSourceType.PRIMARY) {
+            sqlServerService.selectTest();
+        } else if (type == DataSourceType.SECONDARY) {
             oracleService.selectTest();
         }
 
 
         return "string";
-//
-//
-//        return args -> {
-//            // 여기에 실행할 코드 작성
-//            System.out.println("내가 만든 Java 파일 실행 중...");
-//            myCustomMethod();
-//            log.info("##########3 secondaryDataSource : {}", dataSource);
-////            List<Map<String, Object>> al = sqlServerRepository.findAllAiReq();
-////            for (Map<String, Object> stringObjectMap : al) {
-////                log.info("{}", stringObjectMap);
-////            }
-//        };
     }
 
     private void myCustomMethod() {

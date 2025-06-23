@@ -18,7 +18,7 @@ import java.util.List;
 @Slf4j
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class OracleService {
+public class OracleService implements DBService {
     private final SqlReader sqlReader;
     private final JdbcTemplate jdbcTemplate;
     private final DataSource dataSource;
